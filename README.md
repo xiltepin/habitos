@@ -1,6 +1,6 @@
-# 🌱 HabitNow - Habit Tracker
+# 🌱 Habitos - Habit Tracker
 
-A full-stack habit tracking application inspired by the Android HabitNow app. Built with NestJS (backend) and Angular (frontend), fully containerized with Docker.
+A full-stack habit tracking application. Built with NestJS (backend) and Angular (frontend), fully containerized with Docker.
 
 **Live Demo:** https://habitos.xiltepin.me
 
