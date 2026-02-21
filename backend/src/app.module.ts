@@ -7,14 +7,15 @@ import { AuthModule } from './auth/auth.module';
 import { HabitsModule } from './habits/habits.module';
 import { UsersModule } from './users/users.module';
 import { CompletionsModule } from './completions/completions.module';
+import { WeightsModule } from './weights/weights.module'; // ← ADD THIS
 
 import { User } from './users/user.entity';
 import { Habit } from './habits/habit.entity';
 import { Completion } from './completions/completion.entity';
+import { Weight } from './weights/weight.entity'; // ← ADD THIS
 
 @Module({
   imports: [
-    // Load and validate environment variables globally
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: process.env.NODE_ENV === 'production' ? '.env.production' : '.env',
@@ -27,28 +28,27 @@ import { Completion } from './completions/completion.entity';
         DB_PATH: Joi.string().required(),
       }),
       validationOptions: {
-        abortEarly: false, // show all validation errors
+        abortEarly: false,
       },
     }),
 
-    // Database connection (SQLite with better-sqlite3)
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => ({
         type: 'better-sqlite3' as const,
         database: config.get<string>('DB_PATH')!,
-        entities: [User, Habit, Completion],
-        synchronize: true, // ← set to false in real production after migrations
-        logging: config.get('NODE_ENV') === 'development', // helpful for dev
+        entities: [User, Habit, Completion, Weight], // ← ADD Weight HERE
+        synchronize: true,
+        logging: config.get('NODE_ENV') === 'development',
       }),
       inject: [ConfigService],
     }),
 
-    // Your feature modules
     AuthModule,
     UsersModule,
     HabitsModule,
     CompletionsModule,
+    WeightsModule, // ← ADD THIS
   ],
 })
 export class AppModule {}

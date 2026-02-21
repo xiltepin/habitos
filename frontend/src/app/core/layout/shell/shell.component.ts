@@ -33,6 +33,10 @@ import { AuthService } from '../../services/auth.service';
           <span class="nav-icon">📊</span>
           <span class="nav-label">Stats</span>
         </a>
+        <a routerLink="/weight" routerLinkActive="active" class="nav-item">
+          <span class="nav-icon">⚖️</span>
+          <span class="nav-label">Weight</span>
+        </a>
       </nav>
     </div>
   `,

@@ -1,9 +1,13 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { HabitsService, Habit } from '../../core/services/habits.service';
+import { WeightsService } from '../../core/services/weights.service';
+import { WeightModalComponent, WeightEntry } from '../../shared/weight-modal/weight-modal.component';
 
 @Component({
   selector: 'app-stats',
   standalone: true,
+  imports: [CommonModule, WeightModalComponent],
   template: `
     <div class="stats-page">
       <div class="page-header">
@@ -44,11 +48,16 @@ import { HabitsService, Habit } from '../../core/services/habits.service';
               class="cal-day"
               [class.has-data]="day.count > 0"
               [class.today]="day.isToday"
+              [class.has-weight]="day.weight !== null"
               [style.opacity]="day.count > 0 ? (0.3 + day.count * 0.15) : 1"
               [style.background]="day.count > 0 ? 'var(--primary)' : 'var(--bg)'"
-              [title]="day.date + ': ' + day.count + ' completions'"
+              [title]="day.date + ': ' + day.count + ' completions' + (day.weight ? ' | ' + day.weight + ' kg' : '')"
+              (click)="openWeightModal(day.date, day.weight)"
             >
               <span class="day-num">{{ day.dayNum }}</span>
+              @if (day.weight !== null) {
+                <span class="day-weight">{{ day.weight }}</span>
+              }
             </div>
           }
         </div>
@@ -95,6 +104,11 @@ import { HabitsService, Habit } from '../../core/services/habits.service';
         }
       </div>
     </div>
+
+    <!-- Weight Modal -->
+    <app-weight-modal
+      (onSave)="handleWeightSave($event)"
+    ></app-weight-modal>
   `,
   styles: [`
     .stats-page { padding: 20px 16px; max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
@@ -153,14 +167,43 @@ import { HabitsService, Habit } from '../../core/services/habits.service';
       aspect-ratio: 1;
       border-radius: 6px;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       border: 1px solid var(--border);
-      transition: opacity 0.2s;
+      transition: all 0.2s;
+      cursor: pointer;
+      position: relative;
+      padding: 2px;
+    }
+    .cal-day:hover {
+      transform: scale(1.05);
+      border-color: var(--primary);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
     .cal-day.today { outline: 2px solid var(--primary); outline-offset: 1px; }
-    .day-num { font-size: 0.65rem; color: white; font-weight: 600; }
+    .day-num { 
+      font-size: 0.65rem; 
+      color: white; 
+      font-weight: 600; 
+      line-height: 1;
+    }
     .cal-day:not(.has-data) .day-num { color: var(--text-muted); }
+    
+    .day-weight {
+      font-size: 0.55rem;
+      color: white;
+      font-weight: 700;
+      margin-top: 1px;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 1px 3px;
+      border-radius: 3px;
+      line-height: 1;
+    }
+    .cal-day:not(.has-data) .day-weight { 
+      color: var(--text); 
+      background: rgba(0, 0, 0, 0.05);
+    }
 
     .heatmap-legend {
       display: flex;
@@ -204,14 +247,19 @@ import { HabitsService, Habit } from '../../core/services/habits.service';
   `],
 })
 export class StatsComponent implements OnInit {
+  @ViewChild(WeightModalComponent) weightModal!: WeightModalComponent;
+
   habits = signal<Habit[]>([]);
   monthStats = signal<any>({ byDay: {}, total: 0 });
-  habitCompletions = signal<Map<number, number>>(new Map());
+  weights = signal<Map<string, number>>(new Map());
 
   private _year = signal(new Date().getFullYear());
   private _month = signal(new Date().getMonth() + 1);
 
-  constructor(private habitsService: HabitsService) {}
+  constructor(
+    private habitsService: HabitsService,
+    private weightsService: WeightsService
+  ) {}
 
   ngOnInit() {
     this.loadData();
@@ -221,6 +269,23 @@ export class StatsComponent implements OnInit {
     this.habitsService.getAll().subscribe((h) => this.habits.set(h));
     this.habitsService.getMonthStats(this._year(), this._month()).subscribe((stats) => {
       this.monthStats.set(stats);
+    });
+    this.loadWeights();
+  }
+
+  loadWeights() {
+    const year = this._year();
+    const month = this._month();
+    const startDate = `${year}-${String(month).padStart(2, '0')}-01`;
+    const endDate = `${year}-${String(month).padStart(2, '0')}-${new Date(year, month, 0).getDate()}`;
+
+    this.weightsService.getWeightsByRange(startDate, endDate).subscribe({
+      next: (weights) => {
+        const weightMap = new Map<string, number>();
+        weights.forEach((w) => weightMap.set(w.date, w.weight));
+        this.weights.set(weightMap);
+      },
+      error: (err) => console.error('Failed to load weights:', err)
     });
   }
 
@@ -253,6 +318,7 @@ export class StatsComponent implements OnInit {
     const daysInMonth = new Date(year, month, 0).getDate();
     const today = new Date();
     const byDay = this.monthStats().byDay || {};
+    const weightMap = this.weights();
 
     return Array.from({ length: daysInMonth }, (_, i) => {
       const day = i + 1;
@@ -265,6 +331,7 @@ export class StatsComponent implements OnInit {
         date: dateStr,
         dayNum: day,
         count: byDay[dateStr] || 0,
+        weight: weightMap.get(dateStr) || null,
         isToday,
       };
     });
@@ -293,9 +360,28 @@ export class StatsComponent implements OnInit {
   getHabitRate(habitId: number): number {
     const days = new Date(this._year(), this._month(), 0).getDate();
     const byDay = this.monthStats().byDay || {};
-    // Rough estimate based on total / habits
     const total = Object.values(byDay).reduce((a: number, b: any) => a + b, 0) as number;
     if (!days || !this.totalHabits()) return 0;
     return Math.min(100, Math.round((total / (days * this.totalHabits())) * 100));
+  }
+
+  // Weight modal methods
+  openWeightModal(date: string, currentWeight: number | null) {
+    this.weightModal.open(date, currentWeight || undefined);
+  }
+
+  handleWeightSave(entry: WeightEntry) {
+    this.weightsService.upsertWeight(entry).subscribe({
+      next: () => {
+        // Update local weights map
+        const weightMap = new Map(this.weights());
+        weightMap.set(entry.date, entry.weight);
+        this.weights.set(weightMap);
+      },
+      error: (err) => {
+        console.error('Failed to save weight:', err);
+        alert('Failed to save weight. Please try again.');
+      }
+    });
   }
 }

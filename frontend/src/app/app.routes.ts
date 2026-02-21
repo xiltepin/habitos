@@ -54,6 +54,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/stats/stats.component').then((m) => m.StatsComponent),
       },
+      {
+        path: 'weight',
+        loadComponent: () =>
+          import('./features/weight/weight.component').then((m) => m.WeightComponent),
+      },
     ],
   },
   { path: '**', redirectTo: 'today' },
