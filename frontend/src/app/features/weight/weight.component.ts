@@ -255,10 +255,12 @@ export class WeightComponent implements OnInit {
     const startDate = new Date(endDate);
     startDate.setDate(startDate.getDate() - days);
 
-    const filteredWeights = this.weights().filter(w => {
-      const wDate = new Date(w.date);
-      return wDate >= startDate && wDate <= endDate;
-    });
+const filteredWeights = this.weights()
+  .filter(w => {
+    const wDate = new Date(w.date);
+    return wDate >= startDate && wDate <= endDate;
+  })
+  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     if (filteredWeights.length === 0) {
       this.chartData.set(null);
