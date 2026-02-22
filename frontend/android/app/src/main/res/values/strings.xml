@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Habitos</string>
+    <string name="title_activity_main">Habitos</string>
+    <string name="package_name">me.xiltepin.habitos</string>
+    <string name="custom_url_scheme">me.xiltepin.habitos</string>
+</resources>
