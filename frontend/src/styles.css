@@ -3,81 +3,100 @@
 
 /* ─── CSS Variables ─── */
 :root {
-  --primary:       #22c55e;
-  --primary-dark:  #16a34a;
+  --primary: #22c55e;
+  --primary-dark: #16a34a;
   --primary-light: #dcfce7;
-  --danger:        #ef4444;
-  --danger-light:  #fee2e2;
+  --danger: #ef4444;
+  --danger-light: #fee2e2;
 
-  --bg:      #f8fafc;
+  --bg: #f8fafc;
   --surface: #ffffff;
-  --border:  #e2e8f0;
+  --border: #e2e8f0;
 
-  --text:       #0f172a;
+  --text: #0f172a;
   --text-muted: #64748b;
 
-  --shadow-sm: 0 1px 3px rgba(0,0,0,.06);
-  --shadow:    0 4px 16px rgba(0,0,0,.08);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, .06);
+  --shadow: 0 4px 16px rgba(0, 0, 0, .08);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --primary:       #4ade80;
-    --primary-dark:  #22c55e;
+    --primary: #4ade80;
+    --primary-dark: #22c55e;
     --primary-light: #14532d;
-    --danger:        #f87171;
-    --danger-light:  #7f1d1d;
+    --danger: #f87171;
+    --danger-light: #7f1d1d;
 
-    --bg:      #0f172a;
+    --bg: #0f172a;
     --surface: #1e293b;
-    --border:  #334155;
+    --border: #334155;
 
-    --text:       #f1f5f9;
+    --text: #f1f5f9;
     --text-muted: #94a3b8;
   }
 }
 
 /* ─── Reset ─── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 html {
   font-size: 16px;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
+  /* Required for safe-area-inset to work on Android/iOS */
+  height: 100%;
 }
 
 body {
   font-family: 'DM Sans', system-ui, sans-serif;
   background: var(--bg);
   color: var(--text);
-  min-height: 100vh;
+  min-height: 100%;
   line-height: 1.5;
 }
 
-h1, h2, h3, h4, h5 {
+h1,
+h2,
+h3,
+h4,
+h5 {
   font-family: 'Nunito', sans-serif;
   font-weight: 700;
   line-height: 1.2;
 }
 
-button, input, select, textarea {
+button,
+input,
+select,
+textarea {
   font-family: inherit;
   font-size: inherit;
 }
 
 /* ─── Scrollbar ─── */
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 3px;
+}
 
 /* ─── Transitions ─── */
-.habit-card, .btn-primary, button { transition: all 0.2s; }
-
-/* ─── PWA / Mobile viewport ─── */
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .bottom-nav {
-    padding-bottom: env(safe-area-inset-bottom);
-    height: calc(60px + env(safe-area-inset-bottom));
-  }
-  .fab { bottom: calc(76px + env(safe-area-inset-bottom)); }
+.habit-card,
+.btn-primary,
+button {
+  transition: all 0.2s;
 }

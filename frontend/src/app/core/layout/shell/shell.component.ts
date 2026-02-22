@@ -51,8 +51,13 @@ import { AuthService } from '../../services/auth.service';
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 20px;
-      height: 56px;
+      /* Push content below status bar on Android/iOS */
+      padding-top: env(safe-area-inset-top);
+      padding-left: 20px;
+      padding-right: 20px;
+      padding-bottom: 0;
+      /* Height = base 56px + status bar inset */
+      min-height: calc(56px + env(safe-area-inset-top));
       background: var(--surface);
       border-bottom: 1px solid var(--border);
       position: sticky;
@@ -103,7 +108,9 @@ import { AuthService } from '../../services/auth.service';
       bottom: 0;
       left: 0;
       right: 0;
-      height: 60px;
+      /* Push content above home indicator on Android/iOS */
+      padding-bottom: env(safe-area-inset-bottom);
+      height: calc(60px + env(safe-area-inset-bottom));
       background: var(--surface);
       border-top: 1px solid var(--border);
       display: flex;
@@ -119,6 +126,9 @@ import { AuthService } from '../../services/auth.service';
       text-decoration: none;
       color: var(--text-muted);
       transition: color 0.2s;
+      /* Don't include bottom padding in flex layout */
+      padding-bottom: env(safe-area-inset-bottom);
+      margin-bottom: calc(-1 * env(safe-area-inset-bottom));
     }
     .nav-item.active {
       color: var(--primary);

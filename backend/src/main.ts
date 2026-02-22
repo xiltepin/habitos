@@ -7,22 +7,27 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
+  const frontendUrl = config.get<string>('FRONTEND_URL');
+
   const allowedOrigins = [
     frontendUrl,
-    'http://localhost',        // Capacitor Android
-    'capacitor://localhost',   // Capacitor iOS
+    'http://localhost',
+    'https://localhost',
+    'capacitor://localhost',
+    'ionic://localhost',
+    'http://localhost:4201',
   ].filter(Boolean);
 
-  // These two lines MUST appear in logs if code runs
   console.log(`[CORS] Allowed origins: ${allowedOrigins.join(', ')}`);
   console.log(`[Startup] Environment: ${config.get('NODE_ENV') || '(not set)'}`);
 
   app.enableCors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, curl)
+      // Allow requests with no origin (mobile apps send no origin header)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.warn(`[CORS] Blocked origin: ${origin}`);
         callback(new Error(`CORS: origin '${origin}' not allowed`));
       }
     },
@@ -42,7 +47,7 @@ async function bootstrap() {
 
   const port = config.get<number>('PORT') || 3001;
   await app.listen(port);
-  console.log(`API running on port ${port} | Allowed CORS: ${frontendUrl}`);
+  console.log(`API running on port ${port} | Allowed CORS: ${allowedOrigins.join(', ')}`);
 }
 
 bootstrap();
