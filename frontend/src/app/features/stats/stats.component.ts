@@ -43,6 +43,9 @@ import { WeightModalComponent, WeightEntry } from '../../shared/weight-modal/wei
       <div class="card">
         <h3>Monthly Activity</h3>
         <div class="calendar-grid">
+          @for (label of ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; track label) {
+            <div class="cal-dow-label">{{ label }}</div>
+          }
           @for (day of calendarDays(); track day.date) {
             <div
               class="cal-day"
@@ -156,13 +159,24 @@ import { WeightModalComponent, WeightEntry } from '../../shared/weight-modal/wei
       padding: 20px;
       margin-bottom: 16px;
     }
-    .card h3 { margin: 0 0 16px; font-size: 1rem; color: var(--text); }
+    .card h3 { margin: 0 0 12px; font-size: 1rem; color: var(--text); }
 
     .calendar-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
       gap: 4px;
     }
+
+    .cal-dow-label {
+      text-align: center;
+      font-size: 0.65rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      padding-bottom: 6px;
+    }
+
     .cal-day {
       aspect-ratio: 1;
       border-radius: 6px;
@@ -182,14 +196,14 @@ import { WeightModalComponent, WeightEntry } from '../../shared/weight-modal/wei
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
     .cal-day.today { outline: 2px solid var(--primary); outline-offset: 1px; }
-    .day-num { 
-      font-size: 0.65rem; 
-      color: white; 
-      font-weight: 600; 
+    .day-num {
+      font-size: 0.65rem;
+      color: white;
+      font-weight: 600;
       line-height: 1;
     }
     .cal-day:not(.has-data) .day-num { color: var(--text-muted); }
-    
+
     .day-weight {
       font-size: 0.55rem;
       color: white;
@@ -200,8 +214,8 @@ import { WeightModalComponent, WeightEntry } from '../../shared/weight-modal/wei
       border-radius: 3px;
       line-height: 1;
     }
-    .cal-day:not(.has-data) .day-weight { 
-      color: var(--text); 
+    .cal-day:not(.has-data) .day-weight {
+      color: var(--text);
       background: rgba(0, 0, 0, 0.05);
     }
 

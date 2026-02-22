@@ -17,6 +17,7 @@ A full-stack habit tracking application. Built with NestJS (backend) and Angular
 - [API Documentation](#-api-documentation)
 - [Development](#-development)
 - [Production Deployment](#-production-deployment)
+- [Android APK](#-android-apk)
 - [Troubleshooting](#-troubleshooting)
 - [Contributing](#-contributing)
 
@@ -68,20 +69,23 @@ cd ~/tools/habitnow
 - ✅ One-tap completion toggle
 - ✅ Streak calculation
 - ✅ Historical data view
+- ✅ Weight tracking with chart visualization
+- ✅ Monthly calendar heatmap with weight overlay
 
 ### UI Features
 - ✅ Mobile-responsive design
 - ✅ Dark mode support
 - ✅ Progress ring visualization
 - ✅ Monthly calendar heatmap
-- ✅ Statistics dashboard
+- ✅ Statistics dashboard with day-of-week labels
 - ✅ Bottom navigation
 - ✅ FAB button for quick habit creation
+- ✅ Weight entry modal from calendar
 
 ### Customization
-- ✅ 20 icon choices
+- ✅ 21 icon choices (including 🍺)
 - ✅ 10 color options
-- ✅ Custom habit names
+- ✅ Custom habit names and descriptions
 - ✅ Habit archiving
 
 ---
@@ -99,7 +103,7 @@ cd ~/tools/habitnow
 - **Angular 17** - Frontend framework
 - **RxJS** - Reactive programming
 - **Signals** - State management
-- **Tailwind CSS** - Styling (utility classes only)
+- **CSS Variables** - Theming & dark mode
 
 ### Infrastructure
 - **Docker** - Containerization
@@ -148,11 +152,17 @@ habitnow/
 │       │   ├── habits.controller.ts
 │       │   ├── habits.service.ts
 │       │   └── habits.module.ts
-│       └── completions/        # Habit completions
-│           ├── completion.entity.ts
-│           ├── completions.controller.ts
-│           ├── completions.service.ts
-│           └── completions.module.ts
+│       ├── completions/        # Habit completions
+│       │   ├── completion.entity.ts
+│       │   ├── completions.controller.ts
+│       │   ├── completions.service.ts
+│       │   └── completions.module.ts
+│       └── weights/            # Weight tracking
+│           ├── weight.entity.ts
+│           ├── weight.dto.ts
+│           ├── weights.controller.ts
+│           ├── weights.service.ts
+│           └── weights.module.ts
 │
 └── frontend/
     ├── Dockerfile              # Frontend container (multi-stage)
@@ -164,7 +174,7 @@ habitnow/
     └── src/
         ├── main.ts             # Application entry point
         ├── index.html          # HTML template
-        ├── styles.css          # Global styles
+        ├── styles.css          # Global styles (CSS variables, dark mode)
         ├── environments/
         │   ├── environment.ts      # Dev config
         │   └── environment.prod.ts # Prod config (git-ignored)
@@ -172,16 +182,38 @@ habitnow/
             ├── app.component.ts    # Root component
             ├── app.config.ts       # App configuration
             ├── app.routes.ts       # Route definitions
-            ├── core/               # Core services
+            ├── core/               # Core services & infrastructure
             │   ├── guards/
+            │   │   └── auth.guard.ts
             │   ├── interceptors/
+            │   │   └── auth.interceptor.ts
             │   ├── layout/
+            │   │   └── shell/
+            │   │       └── shell.component.ts   # Topbar + bottom nav
             │   └── services/
-            └── features/           # Feature modules
+            │       ├── auth.service.ts
+            │       ├── habits.service.ts
+            │       └── weights.service.ts
+            ├── shared/             # Reusable components
+            │   └── weight-modal/
+            │       └── weight-modal.component.ts
+            └── features/           # Feature pages
                 ├── auth/
-                ├── habits/
+                │   ├── login/
+                │   │   └── login.component.ts
+                │   └── register/
+                │       └── register.component.ts
                 ├── today/
-                └── stats/
+                │   └── today.component.ts       # Daily habit view
+                ├── habits/
+                │   ├── habit-list/
+                │   │   └── habit-list.component.ts
+                │   └── habit-form/
+                │       └── habit-form.component.ts
+                ├── stats/
+                │   └── stats.component.ts       # Calendar heatmap + stats
+                └── weight/
+                    └── weight.component.ts      # Weight chart
 ```
 
 ---
@@ -189,12 +221,6 @@ habitnow/
 ## 🐳 Deployment Options
 
 ### Option 1: Docker (Production - Recommended)
-
-**Pros:**
-- ✅ Isolated environment
-- ✅ Auto-restart on reboot
-- ✅ Easy scaling
-- ✅ Consistent across environments
 
 ```bash
 cd ~/tools/habitnow
@@ -209,26 +235,17 @@ cd ~/tools/habitnow
 
 ### Option 2: Manual (Development)
 
-**Pros:**
-- ✅ Hot reload
-- ✅ Easy debugging
-- ✅ Direct file access
-
 ```bash
 # Terminal 1 - Backend
 cd ~/tools/habitnow/backend
 npm install
 npm run start:dev
 
-# Terminal 2 - Frontend  
+# Terminal 2 - Frontend
 cd ~/tools/habitnow/frontend
 npm install
 npm start
 ```
-
-**Access:**
-- Frontend: http://localhost:4201
-- Backend: http://localhost:3001/api
 
 ---
 
@@ -237,35 +254,22 @@ npm start
 ### Root `.env` (for Docker Compose)
 
 ```bash
-# Copy template
 cp .env.example .env
-
-# Edit variables
 nano .env
 ```
 
-**Example:**
 ```env
-# JWT Secret (CHANGE THIS!)
 JWT_SECRET=your_super_secret_jwt_key_here
-
-# Ports
 BACKEND_PORT=3001
 FRONTEND_PORT=4201
-
-# URLs (update with your domains)
 FRONTEND_URL=https://habitos.xiltepin.me
 BACKEND_URL=https://habitos-api.xiltepin.me
-
-# Environment
 NODE_ENV=production
 ```
 
 ---
 
 ### Backend `.env` (Development)
-
-Location: `backend/.env`
 
 ```env
 PORT=3001
@@ -279,8 +283,6 @@ NODE_ENV=development
 ---
 
 ### Backend `.env.production` (Production/Docker)
-
-Location: `backend/.env.production`
 
 ```env
 PORT=3001
@@ -304,8 +306,6 @@ export const environment = {
 };
 ```
 
-**⚠️ Important:** This file is git-ignored. Update with your actual API URL.
-
 ---
 
 ## 📡 API Documentation
@@ -315,8 +315,6 @@ export const environment = {
 - **Development:** `http://localhost:3001/api`
 - **Production:** `https://habitos-api.xiltepin.me/api`
 
----
-
 ### Authentication
 
 #### Register
@@ -324,21 +322,7 @@ export const environment = {
 POST /api/auth/register
 Content-Type: application/json
 
-{
-  "email": "user@example.com",
-  "name": "John Doe",
-  "password": "password123"
-}
-
-Response:
-{
-  "access_token": "jwt_token_here",
-  "user": {
-    "id": 1,
-    "email": "user@example.com",
-    "name": "John Doe"
-  }
-}
+{ "email": "user@example.com", "name": "John Doe", "password": "password123" }
 ```
 
 #### Login
@@ -346,327 +330,303 @@ Response:
 POST /api/auth/login
 Content-Type: application/json
 
-{
-  "email": "user@example.com",
-  "password": "password123"
-}
-
-Response: (same as register)
+{ "email": "user@example.com", "password": "password123" }
 ```
-
-#### Get Current User
-```http
-GET /api/auth/me
-Authorization: Bearer {jwt_token}
-
-Response:
-{
-  "id": 1,
-  "email": "user@example.com",
-  "name": "John Doe"
-}
-```
-
----
 
 ### Habits
 
-#### Get All Habits
 ```http
-GET /api/habits
-Authorization: Bearer {jwt_token}
-
-Response:
-[
-  {
-    "id": 1,
-    "name": "Morning Exercise",
-    "type": "good",
-    "frequency": "daily",
-    "timeOfDay": "morning",
-    "icon": "fitness",
-    "color": "blue",
-    "streak": 5,
-    "archived": false
-  }
-]
-```
-
-#### Get Today's Habits
-```http
-GET /api/habits/today?date=2026-02-18
-Authorization: Bearer {jwt_token}
-
-Response: (same as above, filtered for today)
-```
-
-#### Create Habit
-```http
-POST /api/habits
-Authorization: Bearer {jwt_token}
-Content-Type: application/json
-
-{
-  "name": "Drink Water",
-  "type": "good",
-  "frequency": "daily",
-  "timeOfDay": "anytime",
-  "icon": "water",
-  "color": "blue"
-}
-```
-
-#### Update Habit
-```http
-PUT /api/habits/:id
-Authorization: Bearer {jwt_token}
-Content-Type: application/json
-
-{
-  "name": "Updated Name",
-  "archived": true
-}
-```
-
-#### Delete Habit
-```http
+GET    /api/habits
+GET    /api/habits/today?date=YYYY-MM-DD
+GET    /api/habits/:id
+POST   /api/habits
+PUT    /api/habits/:id
 DELETE /api/habits/:id
-Authorization: Bearer {jwt_token}
 ```
-
----
 
 ### Completions
 
-#### Toggle Completion
 ```http
-POST /api/completions/toggle/:habitId
-Authorization: Bearer {jwt_token}
-Content-Type: application/json
-
-{
-  "date": "2026-02-18"
-}
-
-Response:
-{
-  "completed": true,
-  "date": "2026-02-18"
-}
+POST /api/completions/toggle/:habitId?date=YYYY-MM-DD
+GET  /api/completions/history/:habitId?days=30
+GET  /api/completions/stats/month?year=2026&month=2
 ```
 
-#### Get Completion History
+### Weights
+
 ```http
-GET /api/completions/history/:habitId
-Authorization: Bearer {jwt_token}
-
-Response:
-[
-  {
-    "id": 1,
-    "date": "2026-02-18",
-    "habitId": 1
-  }
-]
-```
-
-#### Get Monthly Stats
-```http
-GET /api/completions/stats/month?year=2026&month=2
-Authorization: Bearer {jwt_token}
-
-Response:
-{
-  "2026-02-01": 3,
-  "2026-02-02": 5,
-  ...
-}
+POST   /api/weights                              # Create or update
+GET    /api/weights                              # Get all
+GET    /api/weights?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD
+GET    /api/weights/date/:date                   # Get by date
+PUT    /api/weights/:id                          # Update by id
+DELETE /api/weights/:id                          # Delete by id
+DELETE /api/weights/date/:date                   # Delete by date
 ```
 
 ---
 
 ## 💻 Development
 
-### Backend Development
+### Backend
 
 ```bash
 cd backend
-
-# Install dependencies
 npm install
-
-# Run in dev mode (hot reload)
-npm run start:dev
-
-# Run in production mode
+npm run start:dev   # hot reload
 npm run build
 npm run start:prod
-
-# Run tests
-npm test
-npm run test:e2e
 ```
 
----
-
-### Frontend Development
+### Frontend
 
 ```bash
 cd frontend
-
-# Install dependencies
 npm install
-
-# Run dev server
-npm start
-
-# Build for production
-npm run build
-
-# Run tests
-npm test
+npm start           # dev server at :4201
+npm run build       # production build
 ```
 
----
-
-### Database Management
-
-**Location (Docker):** Docker volume `habitnow-data`
-**Location (Manual):** `backend/habitnow.db`
+### Database
 
 ```bash
 # Access SQLite in Docker
 docker exec -it habitnow-backend sh
-cd /app/data
-sqlite3 habitnow.db
-
-# View tables
+sqlite3 /app/data/habitnow.db
 .tables
-
-# Query users
-SELECT * FROM users;
-
-# Exit
 .exit
+
+# Backup
+docker cp habitnow-backend:/app/data/habitnow.db ~/backups/habitnow-$(date +%Y%m%d).db
 ```
 
 ---
 
 ## 🚀 Production Deployment
 
-### 1. Clone Repository
+### 1. Clone & Configure
 
 ```bash
 cd ~/tools
 git clone <your-repo-url> habitnow
 cd habitnow
-```
-
----
-
-### 2. Configure Environment
-
-```bash
-# Copy template
 cp .env.example .env
-
-# Generate secure JWT secret
-openssl rand -base64 32
-
-# Edit .env
+openssl rand -base64 32   # generate JWT secret
 nano .env
 ```
 
-Update:
-- `JWT_SECRET` with generated value
-- `FRONTEND_URL` with your domain
-- `BACKEND_URL` with your API domain
-
----
-
-### 3. Deploy with Docker
+### 2. Deploy
 
 ```bash
-# Make scripts executable
 chmod +x start.sh stop.sh
-
-# Start containers
 ./start.sh
-
-# Verify
 docker compose ps
 ```
 
+### 3. Reverse Proxy (Nginx Proxy Manager)
+
+| Host | Forward To | SSL |
+|------|-----------|-----|
+| `habitos.xiltepin.me` | `192.168.0.6:4201` | Let's Encrypt |
+| `habitos-api.xiltepin.me` | `192.168.0.6:3001` | Let's Encrypt |
+
 ---
 
-### 4. Configure Reverse Proxy (Nginx Proxy Manager)
+## 📱 Android APK
 
-**Frontend Proxy Host:**
-- Domain: `habitos.xiltepin.me`
-- Forward to: `192.168.0.6:4201`
-- SSL: Enabled (Let's Encrypt)
-- Force SSL: Yes
+You can build a real Android APK using **Capacitor** — a tool that wraps your existing Angular web app in a native Android shell. You reuse 100% of the existing frontend code and the same backend API. No Android experience needed.
 
-**Backend Proxy Host:**
-- Domain: `habitos-api.xiltepin.me`
-- Forward to: `192.168.0.6:3001`
-- SSL: Enabled (Let's Encrypt)
-- Force SSL: Yes
+### How it works
 
-**Advanced Config (both):**
-```nginx
-proxy_hide_header Permissions-Policy;
-
-location / {
-    proxy_pass http://192.168.0.6:4201;  # or 3001 for backend
-    proxy_http_version 1.1;
-    proxy_set_header Host $host;
-    proxy_set_header X-Real-IP $remote_addr;
-    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-    proxy_set_header X-Forwarded-Proto $scheme;
-}
+```
+Your Angular app (unchanged)
+        ↓
+   Capacitor wraps it
+        ↓
+  Android WebView shows it
+        ↓
+     .apk file
 ```
 
 ---
 
-### 5. Setup Auto-Start on Reboot
+### Prerequisites
 
-The `docker-compose.yml` already includes `restart: unless-stopped`.
+Install these on your machine:
 
-**Verify:**
+1. **Node.js 20+** — you already have this
+2. **Android Studio** — https://developer.android.com/studio
+   - During install, make sure to include: Android SDK, Android SDK Platform, Android Virtual Device
+3. **Java JDK 17** — Android Studio usually installs this automatically
+
+---
+
+### Step 1 — Install Capacitor in the frontend
+
 ```bash
-docker inspect habitnow-backend | grep -A 5 RestartPolicy
-```
+cd ~/tools/habitnow/frontend
 
-**Test:**
-```bash
-# Reboot WSL
-wsl --shutdown
-
-# Start WSL again
-wsl
-
-# Check containers
-docker compose ps
+npm install @capacitor/core @capacitor/cli @capacitor/android
 ```
 
 ---
 
-## 📦 Port Configuration
+### Step 2 — Initialize Capacitor
 
-### Development
-- Frontend: `4201`
-- Backend: `3001`
+```bash
+npx cap init
+```
 
-### Production (Docker)
-- Frontend: `4201:80` (container:host)
-- Backend: `3001:3001`
+It will ask:
+- **App name:** `Habitos`
+- **App ID:** `me.xiltepin.habitos` (reverse domain, make up anything like `com.yourname.habitos`)
+- **Web assets directory:** `dist/frontend/browser`
 
-### No Conflicts With
-- Open WebUI: `3000`
-- Subtitle Frontend: `4200`
-- Subtitle Backend: `5001`
-- Ollama: `11434`
+This creates a `capacitor.config.ts` file. Open it and make sure it looks like this:
+
+```typescript
+import { CapacitorConfig } from '@capacitor/cli';
+
+const config: CapacitorConfig = {
+  appId: 'me.xiltepin.habitos',
+  appName: 'Habitos',
+  webDir: 'dist/frontend/browser',
+  server: {
+    androidScheme: 'https'
+  }
+};
+
+export default config;
+```
+
+---
+
+### Step 3 — Build the Angular app
+
+```bash
+npm run build
+```
+
+This produces the static files in `dist/frontend/browser/`.
+
+---
+
+### Step 4 — Add Android platform
+
+```bash
+npx cap add android
+```
+
+This creates an `android/` folder in your frontend directory — that's the native Android project.
+
+---
+
+### Step 5 — Sync web assets into Android
+
+```bash
+npx cap sync android
+```
+
+Run this every time you change the Angular code.
+
+---
+
+### Step 6 — Open in Android Studio
+
+```bash
+npx cap open android
+```
+
+Android Studio opens the project. Wait for Gradle to finish syncing (bottom progress bar). This can take a few minutes the first time.
+
+---
+
+### Step 7 — Build the APK
+
+In Android Studio:
+
+1. Menu → **Build** → **Build Bundle(s) / APK(s)** → **Build APK(s)**
+2. Wait for it to finish
+3. A notification pops up: **"APK(s) generated successfully"** → click **locate**
+4. The APK is at:
+   ```
+   android/app/build/outputs/apk/debug/app-debug.apk
+   ```
+
+---
+
+### Step 8 — Install on your phone
+
+**Option A — USB cable:**
+1. On your Android phone: Settings → Developer Options → Enable USB Debugging
+   - To enable Developer Options: Settings → About Phone → tap "Build Number" 7 times
+2. Connect phone via USB
+3. In Android Studio: select your phone in the device dropdown → click the green ▶ Run button
+
+**Option B — Copy APK directly:**
+1. Copy `app-debug.apk` to your phone (via USB, Google Drive, email, etc.)
+2. On your phone: open the APK file
+3. Allow "Install from unknown sources" when prompted
+4. Install
+
+---
+
+### Making it use the live backend
+
+Your Angular code already points to `https://habitos-api.xiltepin.me/api` in `environment.ts`. The APK will use that same URL — so as long as your backend is running and reachable from the internet, the app just works.
+
+If you want it to work on the same local network without internet, change the API URL in `environment.ts` to your local IP before building:
+
+```typescript
+export const environment = {
+  production: false,
+  apiUrl: 'http://192.168.0.6:3001/api',  // your server's local IP
+};
+```
+
+Then rebuild and sync:
+```bash
+npm run build
+npx cap sync android
+```
+
+---
+
+### Updating the APK after code changes
+
+```bash
+# Make your changes to Angular code, then:
+npm run build
+npx cap sync android
+# Then rebuild APK in Android Studio as before
+```
+
+---
+
+### Troubleshooting APK
+
+**App shows blank white screen:**
+- Check that `webDir` in `capacitor.config.ts` matches your actual build output folder
+- Run `npm run build` again and check for errors
+- Verify `dist/frontend/browser/index.html` exists
+
+**Network requests fail (API calls don't work):**
+- Your backend must be on HTTPS if `androidScheme: 'https'` is set
+- Or change to `androidScheme: 'http'` and add this to `android/app/src/main/AndroidManifest.xml`:
+  ```xml
+  <application android:usesCleartextTraffic="true" ...>
+  ```
+
+**Gradle sync fails in Android Studio:**
+- File → Invalidate Caches → Restart
+- Make sure Android SDK is installed: Android Studio → SDK Manager
+
+**"SDK location not found" error:**
+- In the `android/` folder, create `local.properties`:
+  ```
+  sdk.dir=/Users/yourname/AppData/Local/Android/Sdk
+  ```
+  (find the actual path in Android Studio → SDK Manager)
 
 ---
 
@@ -675,86 +635,38 @@ docker compose ps
 ### Backend won't start
 
 ```bash
-# Check logs
 docker compose logs habitnow-backend
-
-# Common issues:
-# 1. Port 3001 already in use
-sudo lsof -i :3001
-kill -9 <PID>
-
-# 2. Database permission issues
-docker exec habitnow-backend ls -la /app/data/
-
-# 3. Environment variables not loaded
-docker exec habitnow-backend env | grep JWT_SECRET
+sudo lsof -i :3001   # check port conflict
 ```
-
----
 
 ### Frontend shows 404 on refresh
 
-This is normal for SPAs. Nginx is configured to handle this.
-
-**Verify nginx.conf:**
-```nginx
-location / {
-    try_files $uri $uri/ /index.html;
-}
-```
-
----
+Nginx handles this via `try_files $uri $uri/ /index.html`.
 
 ### CORS errors
 
-**Check backend CORS configuration:**
 ```bash
 docker compose logs habitnow-backend | grep CORS
+# Should show: [CORS] Allowed origin: https://habitos.xiltepin.me
 ```
-
-Should show:
-```
-[CORS] Allowed origin: https://habitos.xiltepin.me
-```
-
-**If wrong, update:**
-1. `docker-compose.yml` → `FRONTEND_URL` env var
-2. Rebuild: `docker compose up -d --build habitnow-backend`
-
----
-
-### Can't login from external network
-
-**Check frontend API URL:**
-```bash
-docker exec habitnow-frontend sh -c "cat /usr/share/nginx/html/*.js | grep -o 'habitos-api' | head -1"
-```
-
-Should output: `habitos-api`
-
-**If shows localhost:**
-1. Update `frontend/src/environments/environment.prod.ts`
-2. Rebuild: `docker compose up -d --build habitnow-frontend`
-
----
 
 ### Database lost after restart
 
-**Check volume:**
 ```bash
 docker volume ls | grep habitnow
-docker volume inspect habitnow-data
-```
-
-**Backup database:**
-```bash
-# Create backup
 docker cp habitnow-backend:/app/data/habitnow.db ~/backups/habitnow-$(date +%Y%m%d).db
-
-# Restore backup
-docker cp ~/backups/habitnow-20260218.db habitnow-backend:/app/data/habitnow.db
-docker compose restart habitnow-backend
 ```
+
+---
+
+## 📦 Port Configuration
+
+| Service | Port |
+|---------|------|
+| Frontend | 4201 |
+| Backend | 3001 |
+
+No conflicts with Open WebUI (3000), Subtitle Frontend (4200), Subtitle Backend (5001), Ollama (11434).
 
 ---
 
@@ -763,93 +675,21 @@ docker compose restart habitnow-backend
 - [ ] Change `JWT_SECRET` to a strong random value
 - [ ] Use HTTPS in production (via reverse proxy)
 - [ ] Keep dependencies updated (`npm audit fix`)
-- [ ] Use environment variables (never commit secrets)
-- [ ] Enable firewall rules
+- [ ] Never commit `.env` files
 - [ ] Regular database backups
-- [ ] Monitor logs for suspicious activity
-- [ ] Use strong passwords for user accounts
-
----
-
-## 📊 Monitoring
-
-### View Logs
-
-```bash
-# All services
-docker compose logs -f
-
-# Just backend
-docker compose logs -f habitnow-backend
-
-# Just frontend
-docker compose logs -f habitnow-frontend
-
-# Last 50 lines
-docker compose logs --tail=50 habitnow-backend
-```
-
----
-
-### Health Checks
-
-```bash
-# Container status
-docker compose ps
-
-# Test backend
-curl http://localhost:3001/api/auth/me
-
-# Test frontend
-curl http://localhost:4201
-```
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📝 License
-
-This project is licensed under the MIT License.
-
----
-
-## 🙏 Acknowledgments
-
-- Inspired by the Android HabitNow app
-- Built with NestJS and Angular
-- Containerized with Docker
-
----
-
-## 📞 Support
-
-For issues, questions, or contributions:
-- Open an issue on GitHub
-- Check the troubleshooting section above
-- Review Docker logs for error details
 
 ---
 
 ## 🗺 Roadmap
 
-- [ ] Add habit templates
-- [ ] Social features (share habits)
-- [ ] Data export/import
-- [ ] Mobile app (React Native)
-- [ ] Habit reminders/notifications
-- [ ] Gamification (achievements, badges)
+- [ ] Android APK via Capacitor
+- [ ] Push notifications for habit reminders
+- [ ] Habit templates
+- [ ] Data export/import (CSV)
 - [ ] Multi-language support
+- [ ] Gamification (achievements, badges)
 - [ ] PostgreSQL option for larger deployments
 
 ---
 
-**Happy Habit Tracking! 🌱**
+**Happy Habit Tracking! 🌱

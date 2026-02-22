@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HabitsService, Habit } from '../../../core/services/habits.service';
 
-const ICONS = ['✅','🏃','💪','🧘','📚','💧','🥗','😴','🚫','🎯','🌿','🧠','❤️','🎵','✍️','🌅','🚶','🍎','☕','🛡️'];
+const ICONS = ['✅','🏃','💪','🧘','📚','💧','🥗','😴','🚫','🎯','🌿','🧠','❤️','🎵','✍️','🌅','🚶','🍎','☕','🛡️','🍺'];
 const COLORS = ['#4CAF50','#2196F3','#9C27B0','#FF5722','#FF9800','#00BCD4','#E91E63','#607D8B','#795548','#009688'];
 
 @Component({
@@ -145,7 +145,13 @@ const COLORS = ['#4CAF50','#2196F3','#9C27B0','#FF5722','#FF9800','#00BCD4','#E9
     </div>
   `,
   styles: [`
-    .form-page { max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
+    .form-page {
+      max-width: 600px;
+      margin: 0 auto;
+      padding-bottom: 80px;
+    }
+
+    /* NOT sticky — just a normal block header so it never overlaps content */
     .form-header {
       display: flex;
       align-items: center;
@@ -153,11 +159,10 @@ const COLORS = ['#4CAF50','#2196F3','#9C27B0','#FF5722','#FF9800','#00BCD4','#E9
       padding: 16px 20px;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 56px;
-      z-index: 10;
     }
+
     .form-header h2 { margin: 0; font-size: 1.1rem; }
+
     .back-btn {
       background: none;
       border: none;
@@ -166,7 +171,8 @@ const COLORS = ['#4CAF50','#2196F3','#9C27B0','#FF5722','#FF9800','#00BCD4','#E9
       cursor: pointer;
       font-weight: 600;
     }
-    .form-body { padding: 20px 16px; }
+
+    .form-body { padding: 24px 16px; }
 
     .field { margin-bottom: 20px; }
     .field label {
@@ -200,7 +206,6 @@ const COLORS = ['#4CAF50','#2196F3','#9C27B0','#FF5722','#FF9800','#00BCD4','#E9
       gap: 10px;
       flex-wrap: wrap;
     }
-    .radio-group.four { }
     .radio-btn {
       flex: 1;
       min-width: 120px;
