@@ -7,14 +7,25 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const config = app.get(ConfigService);
 
-  const frontendUrl = config.get<string>('FRONTEND_URL');
+  const allowedOrigins = [
+    frontendUrl,
+    'http://localhost',        // Capacitor Android
+    'capacitor://localhost',   // Capacitor iOS
+  ].filter(Boolean);
 
   // These two lines MUST appear in logs if code runs
-  console.log(`[CORS] Allowed origin: ${frontendUrl || '(MISSING IN ENV)'}`);
+  console.log(`[CORS] Allowed origins: ${allowedOrigins.join(', ')}`);
   console.log(`[Startup] Environment: ${config.get('NODE_ENV') || '(not set)'}`);
 
   app.enableCors({
-    origin: frontendUrl,
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS: origin '${origin}' not allowed`));
+      }
+    },
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     allowedHeaders: 'Origin, X-Requested-With, Content-Type, Accept, Authorization',
