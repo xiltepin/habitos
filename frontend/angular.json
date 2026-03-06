@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "habitnow": {
+    "habitos": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/habitnow",
+            "outputPath": "dist/habitos",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": [
@@ -63,10 +63,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "habitnow:build:production"
+              "buildTarget": "habitos:build:production"
             },
             "development": {
-              "buildTarget": "habitnow:build:development"
+              "buildTarget": "habitos:build:development"
             }
           },
           "defaultConfiguration": "development"

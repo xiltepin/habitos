@@ -1,7 +1,7 @@
 {
-  "name": "habitnow-backend",
+  "name": "habitos-backend",
   "version": "1.0.0",
-  "description": "HabitNow copycat backend",
+  "description": "Habitos copycat backend",
   "scripts": {
     "build": "nest build",
     "start": "nest start",

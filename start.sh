@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# HabitNow Docker Startup Script
-# This script builds and starts the HabitNow containers
+# Habitos Docker Startup Script
+# This script builds and starts the Habitos containers
 
 set -e
 
-echo "🌱 Starting HabitNow..."
+echo "🌱 Starting Habitos..."
 echo ""
 
 # Colors for output
@@ -47,7 +47,7 @@ sleep 10
 # Check if containers are running
 if docker-compose ps | grep -q "Up"; then
     echo ""
-    echo -e "${GREEN}✅ HabitNow is running!${NC}"
+    echo -e "${GREEN}✅ Habitos is running!${NC}"
     echo ""
     echo -e "${GREEN}Frontend:${NC} http://localhost:4201"
     echo -e "${GREEN}Backend:${NC}  http://localhost:3001/api"

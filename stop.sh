@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# HabitNow Docker Stop Script
+# Habitos Docker Stop Script
 
 set -e
 
-echo "🛑 Stopping HabitNow..."
+echo "🛑 Stopping Habitos..."
 
 # Colors
 RED='\033[0;31m'
@@ -15,7 +15,7 @@ NC='\033[0m'
 docker-compose down
 
 echo ""
-echo -e "${GREEN}✅ HabitNow stopped successfully${NC}"
+echo -e "${GREEN}✅ Habitos stopped successfully${NC}"
 echo ""
 echo -e "To start again: ${GREEN}./start.sh${NC}"
 echo -e "To remove volumes: ${RED}docker-compose down -v${NC}"
