@@ -9,7 +9,7 @@ import { AuthService } from '../../services/auth.service';
   template: `
     <div class="shell">
       <header class="topbar">
-        <span class="logo">🌱 HabitNow</span>
+        <span class="logo">🌱 Habitos</span>
         <div class="user-info">
           <span class="user-name">{{ auth.user()?.name }}</span>
           <button class="btn-logout" (click)="auth.logout()">Sign out</button>

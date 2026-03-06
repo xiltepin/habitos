@@ -1,13 +1,13 @@
-import { Component, OnInit, signal, ViewChild } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HabitsService, Habit } from '../../core/services/habits.service';
 import { WeightsService } from '../../core/services/weights.service';
-import { WeightModalComponent, WeightEntry } from '../../shared/weight-modal/weight-modal.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-stats',
   standalone: true,
-  imports: [CommonModule, WeightModalComponent],
+  imports: [CommonModule],
   template: `
     <div class="stats-page">
       <div class="page-header">
@@ -41,7 +41,7 @@ import { WeightModalComponent, WeightEntry } from '../../shared/weight-modal/wei
 
       <!-- Calendar Heatmap -->
       <div class="card">
-        <h3>Monthly Activity</h3>
+        <h3>{{ monthlyActivityLabel() }}</h3>
         <div class="calendar-grid">
           @for (label of ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']; track label) {
             <div class="cal-dow-label">{{ label }}</div>
@@ -52,12 +52,13 @@ import { WeightModalComponent, WeightEntry } from '../../shared/weight-modal/wei
               [class.has-data]="day.count > 0"
               [class.today]="day.isToday"
               [class.has-weight]="day.weight !== null"
+              [class.holiday]="day.holidayName !== null"
               [style.opacity]="day.count > 0 ? (0.3 + day.count * 0.15) : 1"
               [style.background]="day.count > 0 ? 'var(--primary)' : 'var(--bg)'"
-              [title]="day.date + ': ' + day.count + ' completions' + (day.weight ? ' | ' + day.weight + ' kg' : '')"
-              (click)="openWeightModal(day.date, day.weight)"
+              [title]="day.date + ': ' + day.count + ' completions' + (day.weight ? ' | ' + day.weight + ' kg' : '') + (day.holidayName ? ' | 🎌 ' + day.holidayName : '')"
+              (click)="navigateToDate(day.date)"
             >
-              <span class="day-num">{{ day.dayNum }}</span>
+              <span class="day-num" [class.holiday-text]="day.holidayName !== null">{{ day.dayNum }}</span>
               @if (day.weight !== null) {
                 <span class="day-weight">{{ day.weight }}</span>
               }
@@ -107,11 +108,6 @@ import { WeightModalComponent, WeightEntry } from '../../shared/weight-modal/wei
         }
       </div>
     </div>
-
-    <!-- Weight Modal -->
-    <app-weight-modal
-      (onSave)="handleWeightSave($event)"
-    ></app-weight-modal>
   `,
   styles: [`
     .stats-page { padding: 20px 16px; max-width: 600px; margin: 0 auto; padding-bottom: 80px; }
@@ -203,6 +199,8 @@ import { WeightModalComponent, WeightEntry } from '../../shared/weight-modal/wei
       line-height: 1;
     }
     .cal-day:not(.has-data) .day-num { color: var(--text-muted); }
+    .cal-day:not(.has-data) .holiday-text { color: #f97316; font-weight: 800; }
+    .cal-day.holiday { border: 1.5px solid #f97316; box-shadow: inset 0 0 4px rgba(249,115,22,0.15); }
 
     .day-weight {
       font-size: 0.55rem;
@@ -261,22 +259,34 @@ import { WeightModalComponent, WeightEntry } from '../../shared/weight-modal/wei
   `],
 })
 export class StatsComponent implements OnInit {
-  @ViewChild(WeightModalComponent) weightModal!: WeightModalComponent;
-
   habits = signal<Habit[]>([]);
   monthStats = signal<any>({ byDay: {}, total: 0 });
   weights = signal<Map<string, number>>(new Map());
+  holidays = signal<Map<string, string>>(new Map());
 
   private _year = signal(new Date().getFullYear());
   private _month = signal(new Date().getMonth() + 1);
 
   constructor(
     private habitsService: HabitsService,
-    private weightsService: WeightsService
-  ) {}
+    private weightsService: WeightsService,
+    private router: Router
+  ) { }
 
   ngOnInit() {
     this.loadData();
+    this.loadHolidays();
+  }
+
+  loadHolidays() {
+    fetch('https://holidays-jp.github.io/api/v1/date.json')
+      .then(res => res.json())
+      .then(data => {
+        const map = new Map<string, string>();
+        Object.keys(data).forEach(k => map.set(k, data[k]));
+        this.holidays.set(map);
+      })
+      .catch(err => console.error('Failed to load JP holidays:', err));
   }
 
   loadData() {
@@ -310,6 +320,13 @@ export class StatsComponent implements OnInit {
     });
   }
 
+  monthlyActivityLabel() {
+    const monthName = new Date(this._year(), this._month() - 1, 1).toLocaleDateString('en-US', {
+      month: 'long'
+    });
+    return `${this._year()}, ${monthName} - Monthly Activity`;
+  }
+
   isCurrentMonth() {
     const now = new Date();
     return this._year() === now.getFullYear() && this._month() === now.getMonth() + 1;
@@ -333,6 +350,7 @@ export class StatsComponent implements OnInit {
     const today = new Date();
     const byDay = this.monthStats().byDay || {};
     const weightMap = this.weights();
+    const holidayMap = this.holidays();
 
     return Array.from({ length: daysInMonth }, (_, i) => {
       const day = i + 1;
@@ -346,6 +364,7 @@ export class StatsComponent implements OnInit {
         dayNum: day,
         count: byDay[dateStr] || 0,
         weight: weightMap.get(dateStr) || null,
+        holidayName: holidayMap.get(dateStr) || null,
         isToday,
       };
     });
@@ -379,23 +398,7 @@ export class StatsComponent implements OnInit {
     return Math.min(100, Math.round((total / (days * this.totalHabits())) * 100));
   }
 
-  // Weight modal methods
-  openWeightModal(date: string, currentWeight: number | null) {
-    this.weightModal.open(date, currentWeight || undefined);
-  }
-
-  handleWeightSave(entry: WeightEntry) {
-    this.weightsService.upsertWeight(entry).subscribe({
-      next: () => {
-        // Update local weights map
-        const weightMap = new Map(this.weights());
-        weightMap.set(entry.date, entry.weight);
-        this.weights.set(weightMap);
-      },
-      error: (err) => {
-        console.error('Failed to save weight:', err);
-        alert('Failed to save weight. Please try again.');
-      }
-    });
+  navigateToDate(date: string) {
+    this.router.navigate(['/today'], { queryParams: { date } });
   }
 }

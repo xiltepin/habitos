@@ -32,7 +32,7 @@ import { HabitsService, Habit } from '../../../core/services/habits.service';
               <div class="hi-body">
                 <div class="hi-name">{{ habit.name }}</div>
                 <div class="hi-meta">
-                  <span class="hi-tag">{{ habit.frequency }}</span>
+                  <span class="hi-tag">{{ formatFrequency(habit.frequency) }}</span>
                   <span class="hi-tag">{{ habit.timeOfDay }}</span>
                 </div>
               </div>
@@ -56,7 +56,7 @@ import { HabitsService, Habit } from '../../../core/services/habits.service';
                   <div class="hi-name">{{ habit.name }}</div>
                   <div class="hi-meta">
                     <span class="hi-tag bad-tag">break habit</span>
-                    <span class="hi-tag">{{ habit.frequency }}</span>
+                    <span class="hi-tag">{{ formatFrequency(habit.frequency) }}</span>
                   </div>
                 </div>
                 <div class="hi-actions">
@@ -182,7 +182,7 @@ export class HabitListComponent implements OnInit {
   habits = signal<Habit[]>([]);
   loading = signal(true);
 
-  constructor(private habitsService: HabitsService) {}
+  constructor(private habitsService: HabitsService) { }
 
   ngOnInit() {
     this.loadHabits();
@@ -197,6 +197,13 @@ export class HabitListComponent implements OnInit {
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  formatFrequency(freq: string) {
+    if (['1', '2', '3', '4', '5', '6', '7'].includes(freq)) {
+      return `${freq}x weekly`;
+    }
+    return freq;
   }
 
   goodHabits() {

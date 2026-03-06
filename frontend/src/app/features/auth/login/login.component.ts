@@ -11,7 +11,7 @@ import { AuthService } from '../../../core/services/auth.service';
     <div class="auth-page">
       <div class="auth-card">
         <div class="auth-logo">🌱</div>
-        <h1>HabitNow</h1>
+        <h1>Habitos</h1>
         <p class="auth-subtitle">Build better habits, one day at a time</p>
 
         <form (ngSubmit)="submit()" #f="ngForm" class="auth-form">

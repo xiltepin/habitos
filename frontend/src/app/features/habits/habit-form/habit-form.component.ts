@@ -3,8 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { HabitsService, Habit } from '../../../core/services/habits.service';
 
-const ICONS = ['✅','🏃','💪','🧘','📚','💧','🥗','😴','🚫','🎯','🌿','🧠','❤️','🎵','✍️','🌅','🚶','🍎','☕','🛡️','🍺'];
-const COLORS = ['#4CAF50','#2196F3','#9C27B0','#FF5722','#FF9800','#00BCD4','#E91E63','#607D8B','#795548','#009688'];
+const ICONS = ['✅', '🏃', '💪', '🧘', '📚', '💧', '🥗', '😴', '🚫', '🎯', '🌿', '🧠', '❤️', '🎵', '✍️', '🌅', '🚶', '🍎', '☕', '🛡️', '🍺'];
+const COLORS = ['#4CAF50', '#2196F3', '#9C27B0', '#FF5722', '#FF9800', '#00BCD4', '#E91E63', '#607D8B', '#795548', '#009688'];
 
 @Component({
   selector: 'app-habit-form',
@@ -89,28 +89,19 @@ const COLORS = ['#4CAF50','#2196F3','#9C27B0','#FF5722','#FF9800','#00BCD4','#E9
 
         <!-- Frequency -->
         <div class="field">
-          <label>Frequency</label>
+          <label>Frequency (Times per week)</label>
           <select [(ngModel)]="form.frequency">
-            <option value="daily">Daily</option>
-            <option value="weekly">Weekly</option>
+            <option value="1">1 time a week</option>
+            <option value="2">2 times a week</option>
+            <option value="3">3 times a week</option>
+            <option value="4">4 times a week</option>
+            <option value="5">5 times a week</option>
+            <option value="6">6 times a week</option>
+            <option value="7">7 times a week (Daily)</option>
           </select>
         </div>
 
-        @if (form.frequency === 'weekly') {
-          <div class="field">
-            <label>Days of Week</label>
-            <div class="day-picker">
-              @for (day of weekDays; track day.value) {
-                <button
-                  type="button"
-                  class="day-btn"
-                  [class.selected]="isDaySelected(day.value)"
-                  (click)="toggleDay(day.value)"
-                >{{ day.label }}</button>
-              }
-            </div>
-          </div>
-        }
+
 
         <!-- Time of Day -->
         <div class="field">
@@ -125,11 +116,11 @@ const COLORS = ['#4CAF50','#2196F3','#9C27B0','#FF5722','#FF9800','#00BCD4','#E9
           </div>
         </div>
 
-        <!-- Target Count -->
-        <div class="field">
+        <!-- [Hidden for now - may be needed in the future] Target Count -->
+        <!-- <div class="field">
           <label>Daily Target (times)</label>
           <input type="number" [(ngModel)]="form.targetCount" min="1" max="100" />
-        </div>
+        </div> -->
 
         @if (error()) {
           <div class="error-msg">{{ error() }}</div>
@@ -322,15 +313,7 @@ const COLORS = ['#4CAF50','#2196F3','#9C27B0','#FF5722','#FF9800','#00BCD4','#E9
 export class HabitFormComponent implements OnInit {
   icons = ICONS;
   colors = COLORS;
-  weekDays = [
-    { label: 'Su', value: '0' },
-    { label: 'Mo', value: '1' },
-    { label: 'Tu', value: '2' },
-    { label: 'We', value: '3' },
-    { label: 'Th', value: '4' },
-    { label: 'Fr', value: '5' },
-    { label: 'Sa', value: '6' },
-  ];
+
   timeOptions = [
     { label: 'Morning', value: 'morning', icon: '🌅' },
     { label: 'Afternoon', value: 'afternoon', icon: '☀️' },
@@ -344,7 +327,7 @@ export class HabitFormComponent implements OnInit {
     icon: '✅',
     color: '#4CAF50',
     type: 'good',
-    frequency: 'daily',
+    frequency: '7',
     frequencyDays: '',
     timeOfDay: 'anytime',
     targetCount: 1,
@@ -358,7 +341,7 @@ export class HabitFormComponent implements OnInit {
     private habitsService: HabitsService,
     private router: Router,
     private route: ActivatedRoute,
-  ) {}
+  ) { }
 
   ngOnInit() {
     const id = this.route.snapshot.params['id'];
@@ -374,17 +357,7 @@ export class HabitFormComponent implements OnInit {
     return !!this.editId;
   }
 
-  isDaySelected(day: string): boolean {
-    return (this.form.frequencyDays || '').split(',').includes(day);
-  }
 
-  toggleDay(day: string) {
-    const days = (this.form.frequencyDays || '').split(',').filter(Boolean);
-    const idx = days.indexOf(day);
-    if (idx >= 0) days.splice(idx, 1);
-    else days.push(day);
-    this.form.frequencyDays = days.join(',');
-  }
 
   goBack() {
     this.router.navigate(['/habits']);

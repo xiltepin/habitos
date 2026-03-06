@@ -19,7 +19,7 @@ RUN npm run build
 FROM nginx:alpine
 
 # Copy built files from builder stage
-COPY --from=builder /app/dist/habitnow/browser /usr/share/nginx/html
+COPY --from=builder /app/dist/habitos/browser /usr/share/nginx/html
 
 # Copy custom nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf

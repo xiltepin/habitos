@@ -1,12 +1,15 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DatePipe, CommonModule  } from '@angular/common';
+import { DatePipe, CommonModule } from '@angular/common';
 import { HabitsService, Habit } from '../../core/services/habits.service';
+import { WeightsService } from '../../core/services/weights.service';
+import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
   selector: 'app-today',
   standalone: true,
-  imports: [RouterLink, DatePipe, CommonModule],
+  imports: [RouterLink, DatePipe, CommonModule, FormsModule],
   template: `
     <div class="today-page">
       <!-- Date Header -->
@@ -90,6 +93,9 @@ import { HabitsService, Habit } from '../../core/services/habits.service';
                     @if (habit.streak && habit.streak > 0) {
                     <span class="streak-badge">🔥 {{ habit.streak }} day streak</span>
                     }
+                    @if (habit.goalAccomplishedThisWeek) {
+                    <span class="goal-badge">⭐ Weekly Goal Accomplished! ({{ habit.totalGoalsAccomplished }} weeks)</span>
+                    }
                     @if (habit.type === 'bad') {
                     <span class="bad-badge">Break habit</span>
                     }
@@ -104,6 +110,28 @@ import { HabitsService, Habit } from '../../core/services/habits.service';
         }
     }
     }
+
+      <!-- Weight Tracker Section -->
+      <div class="time-section">
+        <div class="section-header">
+          <span class="section-icon">⚖️</span>
+          <span class="section-title">Weight Tracker</span>
+        </div>
+        <div class="weight-card">
+          <div class="weight-inputs">
+            <input type="number" [(ngModel)]="weightValue" step="0.1" placeholder="Enter weight (kg)" (keyup.enter)="saveWeight()">
+            <button class="btn-primary" (click)="saveWeight()" [disabled]="isSavingWeight()">
+               {{ isSavingWeight() ? 'Saving...' : 'Save' }}
+            </button>
+          </div>
+          @if (weightSuccess()) {
+            <div class="success-msg">{{ weightSuccess() }}</div>
+          }
+          @if (weightError()) {
+            <div class="error-msg">{{ weightError() }}</div>
+          }
+        </div>
+      </div>
 
       <!-- FAB -->
       <a routerLink="/habits/new" class="fab">+</a>
@@ -244,6 +272,14 @@ import { HabitsService, Habit } from '../../core/services/habits.service';
       padding: 2px 6px;
       border-radius: 4px;
     }
+    .goal-badge {
+      font-size: 0.72rem;
+      color: #059669;
+      font-weight: 600;
+      background: #d1fae5;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
     .bad-badge {
       font-size: 0.72rem;
       color: var(--danger);
@@ -272,6 +308,33 @@ import { HabitsService, Habit } from '../../core/services/habits.service';
       font-weight: 700;
     }
 
+    .weight-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .weight-inputs {
+      display: flex;
+      gap: 12px;
+    }
+    .weight-inputs input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 1rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .weight-inputs input:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+    .success-msg { margin-top: 10px; color: #16a34a; font-size: 0.85rem; font-weight: 600; text-align: center; background: #dcfce7; padding: 8px; border-radius: 8px; border: 1px solid #bbf7d0;}
+    .error-msg { margin-top: 10px; color: #dc2626; font-size: 0.85rem; font-weight: 600; text-align: center; background: #fee2e2; padding: 8px; border-radius: 8px; border: 1px solid #fecaca;}
+
     .fab {
       position: fixed;
       bottom: 76px;
@@ -298,6 +361,11 @@ export class TodayComponent implements OnInit {
   loading = signal(true);
   private _currentDate = signal(new Date());
 
+  weightValue = signal<number | null>(null);
+  isSavingWeight = signal(false);
+  weightSuccess = signal('');
+  weightError = signal('');
+
   timeSections = [
     { key: 'morning', label: 'Morning', icon: '🌅' },
     { key: 'afternoon', label: 'Afternoon', icon: '☀️' },
@@ -305,14 +373,34 @@ export class TodayComponent implements OnInit {
     { key: 'anytime', label: 'Anytime', icon: '⏰' },
   ];
 
-  constructor(private habitsService: HabitsService) {}
+  constructor(
+    private habitsService: HabitsService,
+    private weightsService: WeightsService,
+    private route: ActivatedRoute,
+    private router: Router
+  ) { }
 
   ngOnInit() {
-    this.loadHabits();
+    this.route.queryParams.subscribe(params => {
+      if (params['date']) {
+        const d = new Date(params['date'] + 'T00:00:00');
+        if (!isNaN(d.getTime())) {
+          this._currentDate.set(d);
+        }
+      } else {
+        this._currentDate.set(new Date()); // default when no param
+      }
+      this.loadHabits();
+      this.loadWeight();
+    });
   }
 
   currentDate() {
     return this._currentDate();
+  }
+
+  private formatDate(d: Date): string {
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   }
 
   isToday() {
@@ -328,20 +416,29 @@ export class TodayComponent implements OnInit {
   changeDate(delta: number) {
     const d = new Date(this._currentDate());
     d.setDate(d.getDate() + delta);
-    if (d > new Date()) return;
-    this._currentDate.set(d);
-    this.loadHabits();
+
+    // Check if the new date is strictly greater than today's date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // truncate hours for fair limit comparison
+    const target = new Date(d);
+    target.setHours(0, 0, 0, 0);
+
+    if (target > today) return;
+
+    this.router.navigate(['/today'], { queryParams: { date: this.formatDate(d) } });
   }
 
-  loadHabits() {
-    this.loading.set(true);
-    const dateStr = this._currentDate().toISOString().split('T')[0];
+  loadHabits(showLoading = true) {
+    if (showLoading) this.loading.set(true);
+    const dateStr = this.formatDate(this._currentDate());
     this.habitsService.getTodayHabits(dateStr).subscribe({
       next: (h) => {
         this.habits.set(h);
-        this.loading.set(false);
+        if (showLoading) this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: () => {
+        if (showLoading) this.loading.set(false);
+      },
     });
   }
 
@@ -361,15 +458,59 @@ export class TodayComponent implements OnInit {
   }
 
   toggleHabit(habit: Habit) {
-    const dateStr = this._currentDate().toISOString().split('T')[0];
-    this.habitsService.toggleCompletion(habit.id, dateStr).subscribe((res) => {
-      this.habits.update((habits) =>
-        habits.map((h) =>
-          h.id === habit.id
-            ? { ...h, completedToday: res.completed, streak: res.completed ? (h.streak || 0) + 1 : Math.max(0, (h.streak || 0) - 1) }
-            : h,
-        ),
-      );
+    const dateStr = this.formatDate(this._currentDate());
+    // Optimistic UI update for immediate feedback
+    this.habits.update((habits) =>
+      habits.map((h) =>
+        h.id === habit.id ? { ...h, completedToday: !h.completedToday } : h
+      )
+    );
+    this.habitsService.toggleCompletion(habit.id, dateStr).subscribe(() => {
+      // Background refetch to get accurate calculated streak and weekly goals
+      this.loadHabits(false);
+    });
+  }
+
+  loadWeight() {
+    this.weightSuccess.set('');
+    this.weightError.set('');
+    this.weightValue.set(null);
+    const dateStr = this.formatDate(this._currentDate());
+
+    this.weightsService.getWeightByDate(dateStr).subscribe({
+      next: (w) => {
+        this.weightValue.set(w ? w.weight : null);
+      },
+      error: () => this.weightValue.set(null)
+    });
+  }
+
+  saveWeight() {
+    this.weightError.set('');
+    this.weightSuccess.set('');
+    const v = this.weightValue();
+    if (!v || v <= 0) {
+      this.weightError.set('Please enter a valid weight');
+      return;
+    }
+    if (v > 500) {
+      this.weightError.set('Weight must be less than 500 kg');
+      return;
+    }
+
+    this.isSavingWeight.set(true);
+    const dateStr = this.formatDate(this._currentDate());
+
+    this.weightsService.upsertWeight({ date: dateStr, weight: v }).subscribe({
+      next: () => {
+        this.weightSuccess.set('Weight saved!');
+        this.isSavingWeight.set(false);
+        setTimeout(() => this.weightSuccess.set(''), 3000);
+      },
+      error: () => {
+        this.weightError.set('Failed to save weight.');
+        this.isSavingWeight.set(false);
+      }
     });
   }
 }

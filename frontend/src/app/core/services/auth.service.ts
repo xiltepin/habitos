@@ -12,8 +12,8 @@ export interface User {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly TOKEN_KEY = 'habitnow_token';
-  private readonly USER_KEY = 'habitnow_user';
+  private readonly TOKEN_KEY = 'habitos_token';
+  private readonly USER_KEY = 'habitos_user';
 
   private _user = signal<User | null>(this.loadUser());
   readonly user = this._user.asReadonly();

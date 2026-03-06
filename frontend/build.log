@@ -1,0 +1,46 @@
+
+> habitnow-frontend@1.0.0 build
+> ng build
+
+- Building...
+
+Initial chunk files   | Names                |  Raw size | Estimated transfer size
+chunk-3VVP475P.js     | -                    | 156.50 kB |                45.73 kB
+chunk-YHDXKUZ6.js     | -                    |  78.48 kB |                19.70 kB
+main-JMOA3APV.js      | main                 |  63.19 kB |                16.74 kB
+polyfills-FFHMD2TL.js | polyfills            |  33.71 kB |                11.02 kB
+styles-VX44GSZO.css   | styles               |   9.32 kB |              1002 bytes
+chunk-HWCHZX7Q.js     | -                    |   1.18 kB |               517 bytes
+
+                      | Initial total        | 342.38 kB |                94.67 kB
+
+Lazy chunk files      | Names                |  Raw size | Estimated transfer size
+chunk-RJNF4TUL.js     | -                    |  34.02 kB |                 7.06 kB
+chunk-27ISNHJM.js     | today-component      |  13.94 kB |                 3.92 kB
+chunk-UGCYIEVZ.js     | stats-component      |  10.66 kB |                 3.26 kB
+chunk-EJAQ6GCR.js     | weight-component     |  10.58 kB |                 3.21 kB
+chunk-7QQXWESZ.js     | habit-form-component |   9.61 kB |                 2.71 kB
+chunk-W6KFW7PH.js     | habit-list-component |   6.11 kB |                 1.89 kB
+chunk-TOU2IFCG.js     | register-component   |   4.40 kB |                 1.50 kB
+chunk-WYUVXXB5.js     | login-component      |   4.19 kB |                 1.50 kB
+chunk-3Y3YTDLS.js     | shell-component      |   3.32 kB |                 1.15 kB
+chunk-M6NTB255.js     | -                    |   1.01 kB |               400 bytes
+chunk-6FL4F7LG.js     | -                    | 777 bytes |               777 bytes
+
+Application bundle generation failed. [5.143 seconds]
+
+▲ [WARNING] angular:styles/component:css;7546b0548b802d2ea6fd151e0b9e3a74c2b5c5afd5af60085f485e993ec86367;/home/xiltepin/tools/habitnow/frontend/src/app/features/today/today.component.ts exceeded maximum budget. Budget 2.00 kB was not met by 2.50 kB with a total of 4.50 kB.
+
+
+▲ [WARNING] angular:styles/component:css;81cd5563898f50d4818c6a3437f6895e1dc8dbd8b8fbc067af8c06e42724a370;/home/xiltepin/tools/habitnow/frontend/src/app/features/habits/habit-list/habit-list.component.ts exceeded maximum budget. Budget 2.00 kB was not met by 128 bytes with a total of 2.13 kB.
+
+
+▲ [WARNING] angular:styles/component:css;ae708265335ccdf79730dd57bb78b4f7adc61309c45278d4c1aeaafb57b42454;/home/xiltepin/tools/habitnow/frontend/src/app/features/habits/habit-form/habit-form.component.ts exceeded maximum budget. Budget 2.00 kB was not met by 616 bytes with a total of 2.60 kB.
+
+
+▲ [WARNING] angular:styles/component:css;4ee1544d23daec4d61b35483c86fa99196c72485efc81c695f4587a3632606ea;/home/xiltepin/tools/habitnow/frontend/src/app/features/stats/stats.component.ts exceeded maximum budget. Budget 2.00 kB was not met by 1.10 kB with a total of 3.10 kB.
+
+
+✘ [ERROR] angular:styles/component:css;7546b0548b802d2ea6fd151e0b9e3a74c2b5c5afd5af60085f485e993ec86367;/home/xiltepin/tools/habitnow/frontend/src/app/features/today/today.component.ts exceeded maximum budget. Budget 4.00 kB was not met by 508 bytes with a total of 4.50 kB.
+
+
