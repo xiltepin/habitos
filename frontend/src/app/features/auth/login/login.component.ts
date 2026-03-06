@@ -2,6 +2,8 @@ import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
+import { OfflineService } from '../../../core/services/offline.service';
+import { Capacitor } from '@capacitor/core';
 
 @Component({
   selector: 'app-login',
@@ -45,6 +47,15 @@ import { AuthService } from '../../../core/services/auth.service';
           <button type="submit" class="btn-primary" [disabled]="loading()">
             {{ loading() ? 'Signing in...' : 'Sign In' }}
           </button>
+          
+          @if (isAndroid) {
+            <div class="divider">
+              <span>OR</span>
+            </div>
+            <button type="button" class="btn-offline" (click)="loginOffline()" [disabled]="loading()">
+              Login without credentials (Offline Mode)
+            </button>
+          }
         </form>
 
         <p class="auth-link">
@@ -131,6 +142,40 @@ import { AuthService } from '../../../core/services/auth.service';
       margin-top: 8px;
     }
     .btn-primary:disabled { opacity: 0.6; cursor: default; }
+    .divider {
+      margin: 20px 0;
+      text-align: center;
+      position: relative;
+    }
+    .divider::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: var(--border);
+    }
+    .divider span {
+      background: var(--surface);
+      padding: 0 10px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      position: relative;
+    }
+    .btn-offline {
+      width: 100%;
+      padding: 14px;
+      background: transparent;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-offline:disabled { opacity: 0.6; cursor: default; }
     .auth-link {
       margin-top: 24px;
       font-size: 0.9rem;
@@ -144,19 +189,36 @@ export class LoginComponent {
   password = '';
   loading = signal(false);
   error = signal('');
+  isAndroid = Capacitor.getPlatform() === 'android';
 
   constructor(
     private auth: AuthService,
+    private offlineService: OfflineService,
     private router: Router,
-  ) {}
+  ) { }
 
   submit() {
     this.error.set('');
     this.loading.set(true);
+    this.offlineService.setOfflineMode(false);
     this.auth.login(this.email, this.password).subscribe({
       next: () => this.router.navigate(['/today']),
       error: (e) => {
         this.error.set(e.error?.message || 'Login failed. Check your credentials.');
+        this.loading.set(false);
+      },
+    });
+  }
+
+  loginOffline() {
+    this.error.set('');
+    this.loading.set(true);
+    this.offlineService.setOfflineMode(true);
+    // Interceptor will mock this automatically
+    this.auth.login('offline@localhost', 'offline').subscribe({
+      next: () => this.router.navigate(['/today']),
+      error: () => {
+        this.error.set('Failed to initialize local tracking.');
         this.loading.set(false);
       },
     });
