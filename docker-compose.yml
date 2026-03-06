@@ -10,7 +10,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=3001
-      - FRONTEND_URL=https://habitos.xiltepin.me
+      - FRONTEND_URL=https://habitos.example.com
       - JWT_SECRET=long_random_production_secret_generated_with_openssl_rand_-hex_32_or_similar
       - JWT_EXPIRES_IN=7d
       - DB_PATH=/app/data/habitos.db

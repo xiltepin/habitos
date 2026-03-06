@@ -1,8 +1,8 @@
-# 🌱 Habitos - Habit Tracker
+# 🌱 Habitos
 
 A full-stack habit tracking application. Built with NestJS (backend) and Angular (frontend), fully containerized with Docker.
 
-**Live Demo:** https://habitos.xiltepin.me
+**Live Demo:** https://habitos.example.com
 
 ---
 
@@ -44,7 +44,7 @@ OR for manual setup:
 ### Deploy with Docker (Recommended)
 
 ```bash
-cd ~/tools/habitnow
+cd ~/tools/habitos
 
 # Start everything
 ./start.sh
@@ -116,7 +116,7 @@ cd ~/tools/habitnow
 ## 📁 Project Structure
 
 ```
-habitnow/
+habitos/
 ├── docker-compose.yml          # Container orchestration
 ├── start.sh                    # Quick start script
 ├── stop.sh                     # Quick stop script
@@ -223,7 +223,7 @@ habitnow/
 ### Option 1: Docker (Production - Recommended)
 
 ```bash
-cd ~/tools/habitnow
+cd ~/tools/habitos
 ./start.sh
 ```
 
@@ -237,12 +237,12 @@ cd ~/tools/habitnow
 
 ```bash
 # Terminal 1 - Backend
-cd ~/tools/habitnow/backend
+cd ~/tools/habitos/backend
 npm install
 npm run start:dev
 
 # Terminal 2 - Frontend
-cd ~/tools/habitnow/frontend
+cd ~/tools/habitos/frontend
 npm install
 npm start
 ```
@@ -262,8 +262,8 @@ nano .env
 JWT_SECRET=your_super_secret_jwt_key_here
 BACKEND_PORT=3001
 FRONTEND_PORT=4201
-FRONTEND_URL=https://habitos.xiltepin.me
-BACKEND_URL=https://habitos-api.xiltepin.me
+FRONTEND_URL=https://habitos.example.com
+BACKEND_URL=https://habitos-api.example.com
 NODE_ENV=production
 ```
 
@@ -275,7 +275,7 @@ NODE_ENV=production
 PORT=3001
 JWT_SECRET=dev_secret_change_me
 JWT_EXPIRES_IN=7d
-DB_PATH=./habitnow.db
+DB_PATH=./habitos.db
 FRONTEND_URL=http://localhost:4201
 NODE_ENV=development
 ```
@@ -288,8 +288,8 @@ NODE_ENV=development
 PORT=3001
 JWT_SECRET=long_random_production_secret
 JWT_EXPIRES_IN=7d
-DB_PATH=/app/data/habitnow.db
-FRONTEND_URL=https://habitos.xiltepin.me
+DB_PATH=/app/data/habitos.db
+FRONTEND_URL=https://habitos.example.com
 NODE_ENV=production
 ```
 
@@ -302,7 +302,7 @@ Location: `frontend/src/environments/environment.prod.ts`
 ```typescript
 export const environment = {
   production: true,
-  apiUrl: 'https://habitos-api.xiltepin.me/api',
+  apiUrl: 'https://habitos-api.example.com/api',
 };
 ```
 
@@ -313,7 +313,7 @@ export const environment = {
 ### Base URL
 
 - **Development:** `http://localhost:3001/api`
-- **Production:** `https://habitos-api.xiltepin.me/api`
+- **Production:** `https://habitos-api.example.com/api`
 
 ### Authentication
 
@@ -391,13 +391,13 @@ npm run build       # production build
 
 ```bash
 # Access SQLite in Docker
-docker exec -it habitnow-backend sh
-sqlite3 /app/data/habitnow.db
+docker exec -it habitos-backend sh
+sqlite3 /app/data/habitos.db
 .tables
 .exit
 
 # Backup
-docker cp habitnow-backend:/app/data/habitnow.db ~/backups/habitnow-$(date +%Y%m%d).db
+docker cp habitos-backend:/app/data/habitos.db ~/backups/habitos-$(date +%Y%m%d).db
 ```
 
 ---
@@ -408,8 +408,8 @@ docker cp habitnow-backend:/app/data/habitnow.db ~/backups/habitnow-$(date +%Y%m
 
 ```bash
 cd ~/tools
-git clone <your-repo-url> habitnow
-cd habitnow
+git clone <your-repo-url> habitos
+cd habitos
 cp .env.example .env
 openssl rand -base64 32   # generate JWT secret
 nano .env
@@ -427,8 +427,8 @@ docker compose ps
 
 | Host | Forward To | SSL |
 |------|-----------|-----|
-| `habitos.xiltepin.me` | `192.168.0.6:4201` | Let's Encrypt |
-| `habitos-api.xiltepin.me` | `192.168.0.6:3001` | Let's Encrypt |
+| `habitos.example.com` | `192.168.0.6:4201` | Let's Encrypt |
+| `habitos-api.example.com` | `192.168.0.6:3001` | Let's Encrypt |
 
 ---
 
@@ -464,7 +464,7 @@ Install these on your machine:
 ### Step 1 — Install Capacitor in the frontend
 
 ```bash
-cd ~/tools/habitnow/frontend
+cd ~/tools/habitos/frontend
 
 npm install @capacitor/core @capacitor/cli @capacitor/android
 ```
@@ -573,7 +573,7 @@ In Android Studio:
 
 ### Making it use the live backend
 
-Your Angular code already points to `https://habitos-api.xiltepin.me/api` in `environment.ts`. The APK will use that same URL — so as long as your backend is running and reachable from the internet, the app just works.
+Your Angular code already points to `https://habitos-api.example.com/api` in `environment.ts`. The APK will use that same URL — so as long as your backend is running and reachable from the internet, the app just works.
 
 If you want it to work on the same local network without internet, change the API URL in `environment.ts` to your local IP before building:
 
@@ -635,7 +635,7 @@ npx cap sync android
 ### Backend won't start
 
 ```bash
-docker compose logs habitnow-backend
+docker compose logs habitos-backend
 sudo lsof -i :3001   # check port conflict
 ```
 
@@ -646,15 +646,15 @@ Nginx handles this via `try_files $uri $uri/ /index.html`.
 ### CORS errors
 
 ```bash
-docker compose logs habitnow-backend | grep CORS
-# Should show: [CORS] Allowed origin: https://habitos.xiltepin.me
+docker compose logs habitos-backend | grep CORS
+# Should show: [CORS] Allowed origin: https://habitos.example.com
 ```
 
 ### Database lost after restart
 
 ```bash
-docker volume ls | grep habitnow
-docker cp habitnow-backend:/app/data/habitnow.db ~/backups/habitnow-$(date +%Y%m%d).db
+docker volume ls | grep habitos
+docker cp habitos-backend:/app/data/habitos.db ~/backups/habitos-$(date +%Y%m%d).db
 ```
 
 ---

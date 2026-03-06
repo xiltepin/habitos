@@ -1,11 +1,11 @@
 import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'me.xiltepin.habitos',
+  appId: 'com.example.habitos',
   appName: 'Habitos',
   webDir: 'dist/habitos/browser',
   server: {
-    allowNavigation: ['habitos-api.xiltepin.me']
+    allowNavigation: ['habitos-api.example.com']
   }
 };
 

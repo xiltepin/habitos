@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'https://habitos-api.xiltepin.me/api',
+  apiUrl: 'https://habitos-api.example.com/api',
 };
