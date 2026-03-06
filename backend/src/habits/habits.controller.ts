@@ -23,7 +23,7 @@ export class CreateHabitDto {
   @IsOptional() @IsIn(['good', 'bad'])
   type?: HabitType;
 
-  @IsOptional() @IsIn(['daily', 'weekly', 'custom'])
+  @IsOptional() @IsIn(['1', '2', '3', '4', '5', '6', '7', 'daily', 'weekly', 'custom'])
   frequency?: HabitFrequency;
 
   @IsOptional() @IsString()
@@ -50,7 +50,7 @@ export class UpdateHabitDto extends CreateHabitDto {
 @UseGuards(JwtAuthGuard)
 @Controller('habits')
 export class HabitsController {
-  constructor(private habitsService: HabitsService) {}
+  constructor(private habitsService: HabitsService) { }
 
   @Get()
   findAll(@Request() req) {

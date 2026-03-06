@@ -6,7 +6,7 @@ import { User } from '../users/user.entity';
 import { Completion } from '../completions/completion.entity';
 
 export type HabitType = 'good' | 'bad';
-export type HabitFrequency = 'daily' | 'weekly' | 'custom';
+export type HabitFrequency = '1' | '2' | '3' | '4' | '5' | '6' | '7' | 'daily' | 'weekly' | 'custom';
 export type HabitTimeOfDay = 'morning' | 'afternoon' | 'evening' | 'anytime';
 
 @Entity('habits')
@@ -29,7 +29,7 @@ export class Habit {
   @Column({ default: 'good' })
   type: HabitType;
 
-  @Column({ default: 'daily' })
+  @Column({ default: '7' })
   frequency: HabitFrequency;
 
   // For weekly: comma-separated days (0=Sun,1=Mon,...,6=Sat)

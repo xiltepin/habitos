@@ -9,7 +9,7 @@ export interface Habit {
   icon?: string;
   color?: string;
   type: 'good' | 'bad';
-  frequency: 'daily' | 'weekly' | 'custom';
+  frequency: '1' | '2' | '3' | '4' | '5' | '6' | '7' | 'daily' | 'weekly' | 'custom';
   frequencyDays?: string;
   timeOfDay: 'morning' | 'afternoon' | 'evening' | 'anytime';
   reminderTime?: string;
@@ -21,13 +21,15 @@ export interface Habit {
   completedToday?: boolean;
   completedCount?: number;
   streak?: number;
+  goalAccomplishedThisWeek?: boolean;
+  totalGoalsAccomplished?: number;
 }
 
 @Injectable({ providedIn: 'root' })
 export class HabitsService {
   private api = environment.apiUrl;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   getTodayHabits(date?: string) {
     const d = date || new Date().toISOString().split('T')[0];
