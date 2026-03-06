@@ -31,7 +31,7 @@ export const offlineInterceptor: HttpInterceptorFn = (req, next) => {
                     const id = parseInt(url.split('/').pop()!, 10);
                     return of(new HttpResponse({ status: 200, body: offlineService.getHabit(id) }));
                 }
-                return of(new HttpResponse({ status: 200, body: offlineService.getHabits() }));
+                return of(new HttpResponse({ status: 200, body: offlineService.getActiveHabits() }));
             }
             if (method === 'POST') {
                 return of(new HttpResponse({ status: 201, body: offlineService.createHabit(req.body) }));

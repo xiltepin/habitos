@@ -26,8 +26,17 @@ export class OfflineService {
         return this.getHabits().find(h => h.id === id);
     }
 
+    getActiveHabits(): any[] {
+        return this.getHabits()
+            .filter(h => h.isActive)
+            .sort((a, b) => {
+                if (a.order !== b.order) return (a.order || 0) - (b.order || 0);
+                return new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime();
+            });
+    }
+
     getTodayHabits(date: string): any[] {
-        const habits = this.getHabits().filter(h => h.isActive);
+        const habits = this.getActiveHabits();
         const completions = this.getCompletions(date);
 
         return habits.map(h => {
