@@ -1,8 +1,6 @@
 services:
   habitos-backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    build: ./backend
     container_name: habitos-backend
     restart: unless-stopped
     ports:
@@ -11,24 +9,16 @@ services:
       - NODE_ENV=production
       - PORT=3001
       - FRONTEND_URL=https://habitos.xiltepin.me
-      - JWT_SECRET=long_random_production_secret_generated_with_openssl_rand_-hex_32_or_similar
-      - JWT_EXPIRES_IN=7d
+      - JWT_SECRET=tu_secreto_generado_en_la_torre 
       - DB_PATH=/app/data/habitos.db
     volumes:
-      - habitos-data:/app/data
+      # Mapeo al SSD de la NUC para persistencia fácil
+      - ./data:/app/data
     networks:
       - habitos-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3001/api/habits"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 40s
 
   habitos-frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    build: ./frontend
     container_name: habitos-frontend
     restart: unless-stopped
     ports:
@@ -37,16 +27,6 @@ services:
       - habitos-backend
     networks:
       - habitos-network
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 20s
-
-volumes:
-  habitos-data:
-    driver: local
 
 networks:
   habitos-network:
