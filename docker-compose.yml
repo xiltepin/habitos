@@ -9,7 +9,7 @@ services:
       - NODE_ENV=production
       - PORT=3001
       - FRONTEND_URL=https://habitos.xiltepin.me
-      - JWT_SECRET=tu_secreto_generado_en_la_torre 
+      - JWT_SECRET=tu_secreto_generado_en_la_torre_x
       - DB_PATH=/app/data/habitos.db
     volumes:
       # Mapeo al SSD de la NUC para persistencia fácil

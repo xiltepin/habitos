@@ -36,3 +36,8 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Large binaries and archives
+*.tar.gz
+*.zip
+frontend/android/jdk21.tar.gz

@@ -35,31 +35,31 @@ fi
 
 # Build and start containers
 echo -e "${BLUE}🔨 Building containers...${NC}"
-docker-compose build --no-cache
+docker compose build --no-cache
 
 echo -e "${BLUE}🚀 Starting containers...${NC}"
-docker-compose up -d
+docker compose up -d
 
 # Wait for services to be healthy
 echo -e "${BLUE}⏳ Waiting for services to be ready...${NC}"
 sleep 10
 
 # Check if containers are running
-if docker-compose ps | grep -q "Up"; then
+if docker compose ps | grep -q "Up"; then
     echo ""
     echo -e "${GREEN}✅ Habitos is running!${NC}"
     echo ""
     echo -e "${GREEN}Frontend:${NC} http://localhost:4201"
     echo -e "${GREEN}Backend:${NC}  http://localhost:3001/api"
     echo ""
-    echo -e "${BLUE}📊 View logs:${NC} docker-compose logs -f"
-    echo -e "${BLUE}🛑 Stop:${NC}      docker-compose down"
+    echo -e "${BLUE}📊 View logs:${NC} docker compose logs -f"
+    echo -e "${BLUE}🛑 Stop:${NC}      docker compose down"
 else
     echo -e "${YELLOW}⚠️  Containers started but may not be healthy. Check logs:${NC}"
-    echo "docker-compose logs"
+    echo "docker compose logs"
 fi
 
 # Show running containers
 echo ""
 echo -e "${BLUE}📦 Running containers:${NC}"
-docker-compose ps
+docker compose ps
