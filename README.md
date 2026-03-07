@@ -423,8 +423,8 @@ docker compose ps
 
 | Host | Forward To | SSL |
 |------|-----------|-----|
-| `habitos.example.com` | `192.168.0.6:4201` | Let's Encrypt |
-| `habitos-api.example.com` | `192.168.0.6:3001` | Let's Encrypt |
+| `habitos.example.com` | `192.168.0.4:4201` | Let's Encrypt |
+| `habitos-api.example.com` | `192.168.0.4:3001` | Let's Encrypt |
 
 ---
 
@@ -576,7 +576,7 @@ If you want it to work on the same local network without internet, change the AP
 ```typescript
 export const environment = {
   production: false,
-  apiUrl: 'http://192.168.0.6:3001/api',  // your server's local IP
+  apiUrl: 'http://192.168.0.4:3001/api',  // your server's local IP
 };
 ```
 
@@ -620,7 +620,7 @@ npx cap sync android
 **"SDK location not found" error:**
 - In the `android/` folder, create `local.properties`:
   ```
-  sdk.dir=/Users/yourname/AppData/Local/Android/Sdk
+  sdk.dir=/home/yourname/Android/Sdk
   ```
   (find the actual path in Android Studio → SDK Manager)
 
